@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Splitting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #222;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .explanation {
+            margin-bottom: 20px;
+        }
+        code {
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Team Splitting</h1>
+
+    <div class="explanation">
+        <h2>(A) Split into Two Teams of Six</h2>
+        <p>
+            For each pair of twins, there are two ways to split them into two teams. Since there are 6 pairs, the total number of splits is:
+            <br>
+            <code>2^6 = 64</code>
+        </p>
+        <p>
+            Since the teams are <strong>unlabelled</strong> (swapping teams counts as the same division), we divide by 2:
+            <br>
+            <code>64 ÷ 2 = 32</code>
+        </p>
+    </div>
+
+    <div class="explanation">
+        <h2>(B) Split into Three Teams of Four</h2>
+        <p>
+            First, select 4 pairs from 6 pairs. From each pair, select one twin:
+            <br>
+            <code>6C4 * 2^4</code>
+        </p>
+        <p>
+            Afterward, we are forced to select one twin from the two untouched pairs to avoid placing both twins on the same team:
+            <br>
+            <code>4C2 * (2C2 * 2^2)</code>
+        </p>
+        <p>
+            The last 4 people automatically form the last team:
+            <br>
+            <code>1 way</code>
+        </p>
+        <p>
+            Total for labelled teams:
+            <br>
+            <code>6C4 * 2^4 * 4C2 * (2C2 * 2^2) = 5760</code>
+        </p>
+        <p>
+            Since teams are unlabelled, divide by 3!:
+            <br>
+            <code>5760 ÷ 6 = 960</code>
+        </p>
+    </div>
+
+    <h2>Summary Table</h2>
+    <table>
+        <tr>
+            <th>Problem</th>
+            <th>Labelled Teams</th>
+            <th>Unlabelled Teams</th>
+        </tr>
+        <tr>
+            <td>Two teams of six</td>
+            <td>64</td>
+            <td>32</td>
+        </tr>
+        <tr>
+            <td>Three teams of four</td>
+            <td>5760</td>
+            <td>960</td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>
