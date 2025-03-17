@@ -51,12 +51,20 @@
             padding: 2px 4px;
             border-radius: 4px;
             font-family: monospace;
+            color: #c7254e;
+            font-size: 14px;
         }
         footer {
             text-align: center;
             margin-top: 30px;
             color: #777;
             font-size: 14px;
+        }
+        .step {
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 3px solid #ddd;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -67,45 +75,47 @@
 
     <div class="explanation">
         <h2>(A) Split into Two Teams of Six</h2>
-        <p>
+        <div class="step">
             For each pair of twins, there are two ways to split them into two teams. Since there are 6 pairs, the total number of splits is:
             <br>
             <code>2^6 = 64</code>
-        </p>
-        <p>
+        </div>
+        <div class="step">
             Since the teams are <strong>unlabelled</strong> (swapping teams counts as the same division), we divide by 2:
             <br>
             <code>64 ÷ 2 = 32</code>
-        </p>
+        </div>
     </div>
 
     <div class="explanation">
         <h2>(B) Split into Three Teams of Four</h2>
-        <p>
-            First, select 4 pairs from 6 pairs. From each pair, select one twin:
+        <div class="step">
+            <strong>Step 1:</strong> First, select 4 pupils by picking one out of 4 pairs, which are chosen from 6 available pairs:
             <br>
-            <code>6C4 * 2^4</code>
-        </p>
-        <p>
-            Afterward, we are forced to select one twin from the two untouched pairs to avoid placing both twins on the same team:
+            <code>6C4 * 2^4 = 15 * 16 = 240</code>
+        </div>
+        <div class="step">
+            <strong>Step 2:</strong> After that, two pairs remain untouched, and four pairs already have one twin assigned.
+            We must select one twin from the two untouched pairs to avoid having two twins together in the last team:
             <br>
-            <code>4C2 * (2C2 * 2^2)</code>
-        </p>
-        <p>
-            The last 4 people automatically form the last team:
+            <code>4C2 * (2C2 * 2^2) = 6 * (1 * 4) = 24</code>
+        </div>
+        <div class="step">
+            <strong>Step 3:</strong> The last 4 pupils automatically form the last team — no further choice needed:
             <br>
             <code>1 way</code>
-        </p>
-        <p>
-            Total for labelled teams:
+        </div>
+        <div class="step">
+            <strong>Total for labelled teams:</strong>
             <br>
-            <code>6C4 * 2^4 * 4C2 * (2C2 * 2^2) = 5760</code>
-        </p>
-        <p>
-            Since teams are unlabelled, divide by 3!:
+            <code>6C4 * 2^4 * 4C2 * (2C2 * 2^2) = 15 * 16 * 6 * (1 * 4) = 5760</code>
+        </div>
+        <div class="step">
+            <strong>Final Adjustment for Unlabelled Teams:</strong>
+            Since the teams are unlabelled, divide by 3! to avoid overcounting:
             <br>
             <code>5760 ÷ 6 = 960</code>
-        </p>
+        </div>
     </div>
 
     <h2>Summary Table</h2>

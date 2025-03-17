@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>6 Railway Stations Connectivity</title>
+  <!-- MathJax for rendering math formulas -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .formula {
+      text-align: center;
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+    /* Styles for the rail network SVG */
+    .rail-svg {
+      display: block;
+      margin: auto;
+      background: #fff;
+      border: 1px solid #ccc;
+    }
+    .rail { stroke: #8B4513; stroke-width: 2; }
+    .station { fill: #4682B4; stroke: #000; stroke-width: 1; }
+    .label { font-family: sans-serif; font-size: 12px; fill: #000; }
+    /* Slider styling */
+    .slider-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .copy-button {
+      margin: 10px 0;
+      display: block;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>6 Railway Stations Connectivity</h1>
+    <div class="formula">
+      <!-- Math formula displayed using MathJax -->
+      $$C(6)=2^{\binom{6}{2}}-\sum_{k=1}^{5}\binom{6-1}{\,k-1}C(k)2^{\binom{6-k}{2}}$$
+      <p>The number of ways to close at least one line is <strong>26,703</strong>.</p>
+    </div>
+
+    <h2>Python Code</h2>
+    <button class="copy-button" onclick="copyCode()">Copy Python Code</button>
+    <pre id="pythonCode"><code>import networkx as nx
+from itertools import combinations
+
+def count_connected_excluding_full(n):
+    edges = [(i, j) for i in range(n) for j in range(i+1, n)]
+    connected_count = 0
+    # Enumerate all subgraphs of K_n
+    for r in range(len(edges)+1):
+        for subset in combinations(edges, r):
+            G = nx.Graph()
+            G.add_nodes_from(range(n))
+            G.add_edges_from(subset)
+            if nx.is_connected(G):
+                # Exclude the complete graph (all lines open)
+                if G.number_of_edges() == len(edges):
+                    continue
+                connected_count += 1
+    return connected_count
+
+print(count_connected_excluding_full(6))
+# Outputs: 26703</code></pre>
+
+    <h2>Rail Network Visualization</h2>
+    <div class="slider-container">
+      <label for="graphSlider">Variation Index: <span id="graphIndex">0</span>/<span id="maxIndex">?</span></label><br>
+      <input type="range" id="graphSlider" min="0" value="0">
+    </div>
+    <svg id="railSvg" class="rail-svg" width="400" height="400" viewBox="0 0 400 400">
+      <!-- The nodes will be fixed (arranged in a circle) -->
+      <!-- We pre-draw stations and labels -->
+      <!-- Station positions computed via JavaScript -->
+    </svg>
+  </div>
+
+  <script>
+    // ----- Python Code Copy Functionality -----
+    function copyCode() {
+      const codeText = document.getElementById("pythonCode").innerText;
+      navigator.clipboard.writeText(codeText)
+        .then(() => { alert("Python code copied!"); })
+        .catch(() => { alert("Copy failed!"); });
+    }
+
+    // ----- Graph Generation in JavaScript -----
+    const n = 6;
+    const allEdges = [];
+    // Generate all edges for K6 (nodes 0 to 5)
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        allEdges.push([i, j]);
+      }
+    }
+    const totalEdges = allEdges.length; // 15
+
+    // Helper: Count number of bits set in an integer
+    function bitCount(x) {
+      let count = 0;
+      while(x) { count += x & 1; x >>= 1; }
+      return count;
+    }
+
+    // Helper: Check connectivity for a given graph (edge list)
+    function isConnected(edgeList) {
+      const adj = Array.from({length: n}, () => []);
+      edgeList.forEach(([u,v]) => {
+        adj[u].push(v);
+        adj[v].push(u);
+      });
+      const visited = new Array(n).fill(false);
+      const stack = [0];
+      visited[0] = true;
+      while (stack.length) {
+        const u = stack.pop();
+        for (const v of adj[u]) {
+          if (!visited[v]) {
+            visited[v] = true;
+            stack.push(v);
+          }
+        }
+      }
+      return visited.every(v => v);
+    }
+
+    // Generate all connected graphs (excluding the full graph)
+    const connectedGraphs = [];
+    const maxMask = 1 << totalEdges;  // 2^15 = 32768
+    for (let mask = 0; mask < maxMask; mask++) {
+      // Skip full graph (all bits set)
+      if (bitCount(mask) === totalEdges) continue;
+      const edgeList = [];
+      for (let bit = 0; bit < totalEdges; bit++) {
+        if (mask & (1 << bit)) {
+          edgeList.push(allEdges[bit]);
+        }
+      }
+      if (edgeList.length === 0) continue; // no edges: not connected
+      if (isConnected(edgeList)) {
+        connectedGraphs.push(edgeList);
+      }
+    }
+    console.log("Total connected graphs (excluding full network):", connectedGraphs.length);
+
+    // ----- SVG Drawing of a Graph Variation -----
+    // Compute fixed positions for the 6 stations arranged in a circle
+    const svg = document.getElementById("railSvg");
+    const cx = 200, cy = 200, r = 150;
+    const stationPositions = [];
+    for (let i = 0; i < n; i++) {
+      const angle = (2 * Math.PI * i) / n - Math.PI/2; // start from top
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      stationPositions.push({x, y});
+    }
+
+    // Draw station circles and labels (these remain constant)
+    function drawStations() {
+      // Remove any existing station group if present
+      const existingStations = document.getElementById("stations");
+      if (existingStations) existingStations.remove();
+
+      const stationGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      stationGroup.setAttribute("id", "stations");
+      for (let i = 0; i < n; i++) {
+        const pos = stationPositions[i];
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", pos.x);
+        circle.setAttribute("cy", pos.y);
+        circle.setAttribute("r", 8);
+        circle.setAttribute("class", "station");
+        stationGroup.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", pos.x);
+        text.setAttribute("y", pos.y - 12);
+        text.setAttribute("class", "label");
+        text.setAttribute("text-anchor", "middle");
+        // Label stations as A, B, C, D, E, F
+        text.textContent = String.fromCharCode(65 + i);
+        stationGroup.appendChild(text);
+      }
+      svg.appendChild(stationGroup);
+    }
+
+    // Draw the rail (edges) for the given graph (edge list)
+    function drawEdges(edgeList) {
+      // Remove any existing edges group if present
+      const existingEdges = document.getElementById("edges");
+      if (existingEdges) existingEdges.remove();
+
+      const edgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      edgeGroup.setAttribute("id", "edges");
+      edgeList.forEach(([u, v]) => {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", stationPositions[u].x);
+        line.setAttribute("y1", stationPositions[u].y);
+        line.setAttribute("x2", stationPositions[v].x);
+        line.setAttribute("y2", stationPositions[v].y);
+        line.setAttribute("class", "rail");
+        edgeGroup.appendChild(line);
+      });
+      svg.appendChild(edgeGroup);
+    }
+
+    // Display graph variation by index (if valid)
+    function displayGraph(index) {
+      if (index < 0 || index >= connectedGraphs.length) return;
+      document.getElementById("graphIndex").textContent = index;
+      const edgeList = connectedGraphs[index];
+      drawEdges(edgeList);
+    }
+
+    // Initialize: draw stations once and set up slider
+    drawStations();
+    const slider = document.getElementById("graphSlider");
+    slider.max = connectedGraphs.length - 1;
+    document.getElementById("maxIndex").textContent = connectedGraphs.length - 1;
+    // Show the first variation
+    displayGraph(0);
+
+    // Update graph when slider moves
+    slider.addEventListener("input", (event) => {
+      const idx = parseInt(event.target.value);
+      displayGraph(idx);
+    });
+  </script>
+</body>
+</html>
