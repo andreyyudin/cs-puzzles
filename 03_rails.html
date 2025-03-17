@@ -32,39 +32,106 @@
       font-size: 1.2em;
       margin: 20px 0;
     }
-    /* Styles for the rail network SVG */
+    .formula-explanation {
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+    /* Rail network SVG styles */
     .rail-svg {
       display: block;
       margin: auto;
       background: #fff;
       border: 1px solid #ccc;
     }
-    .rail { stroke: #8B4513; stroke-width: 2; }
-    .station { fill: #4682B4; stroke: #000; stroke-width: 1; }
-    .label { font-family: sans-serif; font-size: 12px; fill: #000; }
-    /* Slider styling */
-    .slider-container {
+    /* Draw railroads as dashed lines */
+    .rail {
+      stroke: #8B4513;
+      stroke-width: 2;
+      stroke-dasharray: 6, 4;
+    }
+    /* Station icons will be drawn as groups, so these styles apply inside them */
+    .station-icon rect, .station-icon polygon {
+      fill: #4682B4;
+      stroke: #000;
+      stroke-width: 1;
+    }
+    .label {
+      font-family: sans-serif;
+      font-size: 12px;
+      fill: #000;
+    }
+    /* Controls styling */
+    .control-container {
       text-align: center;
       margin: 20px 0;
     }
-    .copy-button {
-      margin: 10px 0;
-      display: block;
+    .control-container input[type="number"] {
+      width: 60px;
       text-align: center;
+    }
+    .control-container button {
+      margin: 0 10px;
+      padding: 5px 10px;
+    }
+    /* In-page popup for copy confirmation */
+    #copyPopup {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4CAF50;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
+  <!-- In-page copy confirmation popup -->
+  <div id="copyPopup">Python code copied!</div>
   <div class="container">
     <h1>6 Railway Stations Connectivity</h1>
     <div class="formula">
       <!-- Math formula displayed using MathJax -->
-      $$C(6)=2^{\binom{6}{2}}-\sum_{k=1}^{5}\binom{6-1}{\,k-1}C(k)2^{\binom{6-k}{2}}$$
-      <p>The number of ways to close at least one line is <strong>26,703</strong>.</p>
+        <p>The formula to calculate the number of ways the stations can remain connected when at least one line is
+            closed:</p>
+      $$total = C(n) - 1,$$
+    </div>
+    <div class="formula-explanation">
+      <p>where:</p>
+      <ul>
+        <li>
+          \(C(n)\) is the number of ways to keep all train stations connected when there are \( n \) stations.
+        </li>
+        <li>
+          \(- 1\) — because we do not count the case where all railway lines remain open (no lines are closed).
+        </li>
+      </ul>
+      <p>And \(C(n)\) is calculated as:</p>
+    </div>
+    <div class="formula">
+      <!-- Math formula displayed using MathJax -->
+      $$C(n)=2^{\binom{n}{2}}-\sum_{k=1}^{n-1}\binom{n-1}{\,k-1}C(k)2^{\binom{n-k}{2}},$$
+    </div>
+    <div class="formula-explanation">
+      <p>where:</p>
+      <ul>
+        <li>
+          \( 2^{\binom{n}{2}}\) is the total number of possible railway networks between \( n \) stations.
+          The base \(2\) comes from the fact that each possible railway line between two stations can either be
+          open or closed. The term \( \binom{n}{2} \) counts how many different pairs of stations there are
+          (which equals the number of possible railway lines).
+        </li>
+        <li>
+          The summation subtracts the cases where the network becomes disconnected — for example, when some stations form a separate, isolated group.
+        </li>
+      </ul>
+      <p>The number of ways to close at least one railway line while keeping all stations connected for \( n = 6 \) is <strong>26,703</strong>.</p>
     </div>
 
     <h2>Python Code</h2>
-    <button class="copy-button" onclick="copyCode()">Copy Python Code</button>
     <pre id="pythonCode"><code>import networkx as nx
 from itertools import combinations
 
@@ -86,32 +153,42 @@ def count_connected_excluding_full(n):
 
 print(count_connected_excluding_full(6))
 # Outputs: 26703</code></pre>
+    <button class="copy-button" onclick="copyCode()">Copy Python Code</button>
 
     <h2>Rail Network Visualization</h2>
-    <div class="slider-container">
-      <label for="graphSlider">Variation Index: <span id="graphIndex">0</span>/<span id="maxIndex">?</span></label><br>
-      <input type="range" id="graphSlider" min="0" value="0">
+    <div class="control-container">
+      <button id="prevBtn">Previous</button>
+      <input type="number" id="graphIndexInput" value="1" min="1">
+      <button id="nextBtn">Next</button>
+      <br>
+      <input type="range" id="graphSlider" min="0" value="0" style="width:80%;">
+      <br>
+      <span>Variation Index: <span id="currentIndex">1</span> / <span id="maxIndex">?</span></span>
+      <br><br>
+      <!-- Train animation controls -->
+      <button id="startTrainBtn">Start Train</button>
+      <button id="pauseTrainBtn">Pause</button>
+      <button id="resetTrainBtn">Reset Train</button>
     </div>
     <svg id="railSvg" class="rail-svg" width="400" height="400" viewBox="0 0 400 400">
-      <!-- The nodes will be fixed (arranged in a circle) -->
-      <!-- We pre-draw stations and labels -->
-      <!-- Station positions computed via JavaScript -->
+      <!-- Stations, edges, and train are drawn via JavaScript -->
     </svg>
   </div>
 
   <script>
-    // ----- Python Code Copy Functionality -----
+    // ----- Copy Python Code with In-page Popup -----
     function copyCode() {
       const codeText = document.getElementById("pythonCode").innerText;
-      navigator.clipboard.writeText(codeText)
-        .then(() => { alert("Python code copied!"); })
-        .catch(() => { alert("Copy failed!"); });
+      navigator.clipboard.writeText(codeText).then(() => {
+        const popup = document.getElementById("copyPopup");
+        popup.style.display = "block";
+        setTimeout(() => { popup.style.display = "none"; }, 2000);
+      });
     }
 
     // ----- Graph Generation in JavaScript -----
     const n = 6;
     const allEdges = [];
-    // Generate all edges for K6 (nodes 0 to 5)
     for (let i = 0; i < n; i++) {
       for (let j = i + 1; j < n; j++) {
         allEdges.push([i, j]);
@@ -119,17 +196,15 @@ print(count_connected_excluding_full(6))
     }
     const totalEdges = allEdges.length; // 15
 
-    // Helper: Count number of bits set in an integer
     function bitCount(x) {
       let count = 0;
       while(x) { count += x & 1; x >>= 1; }
       return count;
     }
 
-    // Helper: Check connectivity for a given graph (edge list)
     function isConnected(edgeList) {
       const adj = Array.from({length: n}, () => []);
-      edgeList.forEach(([u,v]) => {
+      edgeList.forEach(([u, v]) => {
         adj[u].push(v);
         adj[v].push(u);
       });
@@ -148,19 +223,18 @@ print(count_connected_excluding_full(6))
       return visited.every(v => v);
     }
 
-    // Generate all connected graphs (excluding the full graph)
+    // Generate all connected graphs (excluding full graph)
     const connectedGraphs = [];
-    const maxMask = 1 << totalEdges;  // 2^15 = 32768
+    const maxMask = 1 << totalEdges;
     for (let mask = 0; mask < maxMask; mask++) {
-      // Skip full graph (all bits set)
-      if (bitCount(mask) === totalEdges) continue;
+      if (bitCount(mask) === totalEdges) continue; // skip full graph
       const edgeList = [];
       for (let bit = 0; bit < totalEdges; bit++) {
         if (mask & (1 << bit)) {
           edgeList.push(allEdges[bit]);
         }
       }
-      if (edgeList.length === 0) continue; // no edges: not connected
+      if (edgeList.length === 0) continue;
       if (isConnected(edgeList)) {
         connectedGraphs.push(edgeList);
       }
@@ -168,20 +242,27 @@ print(count_connected_excluding_full(6))
     console.log("Total connected graphs (excluding full network):", connectedGraphs.length);
 
     // ----- SVG Drawing of a Graph Variation -----
-    // Compute fixed positions for the 6 stations arranged in a circle
     const svg = document.getElementById("railSvg");
     const cx = 200, cy = 200, r = 150;
     const stationPositions = [];
     for (let i = 0; i < n; i++) {
-      const angle = (2 * Math.PI * i) / n - Math.PI/2; // start from top
+      const angle = (2 * Math.PI * i) / n - Math.PI/2;
       const x = cx + r * Math.cos(angle);
       const y = cy + r * Math.sin(angle);
       stationPositions.push({x, y});
     }
+    // Label offsets: A on top, D bottom, B/C right, E/F left.
+    const labelOffsets = [
+      {dx: 0, dy: -26},   // A
+      {dx: 20, dy: 0},    // B
+      {dx: 20, dy: 20},   // C
+      {dx: 0, dy: 26},    // D
+      {dx: -20, dy: 20},  // E
+      {dx: -20, dy: 0}    // F
+    ];
 
-    // Draw station circles and labels (these remain constant)
+    // Draw station icons as a simple station building: a rectangle with a triangular roof.
     function drawStations() {
-      // Remove any existing station group if present
       const existingStations = document.getElementById("stations");
       if (existingStations) existingStations.remove();
 
@@ -189,28 +270,35 @@ print(count_connected_excluding_full(6))
       stationGroup.setAttribute("id", "stations");
       for (let i = 0; i < n; i++) {
         const pos = stationPositions[i];
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", pos.x);
-        circle.setAttribute("cy", pos.y);
-        circle.setAttribute("r", 8);
-        circle.setAttribute("class", "station");
-        stationGroup.appendChild(circle);
-
+        const stationIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        stationIcon.setAttribute("class", "station-icon");
+        // Station building: rectangle
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", pos.x - 8);
+        rect.setAttribute("y", pos.y - 8);
+        rect.setAttribute("width", 16);
+        rect.setAttribute("height", 16);
+        stationIcon.appendChild(rect);
+        // Station roof: triangle
+        const roof = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        roof.setAttribute("points", `${pos.x - 8},${pos.y - 8} ${pos.x},${pos.y - 20} ${pos.x + 8},${pos.y - 8}`);
+        stationIcon.appendChild(roof);
+        // Station label
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", pos.x);
-        text.setAttribute("y", pos.y - 12);
+        const offset = labelOffsets[i];
+        text.setAttribute("x", pos.x + offset.dx);
+        text.setAttribute("y", pos.y + offset.dy);
         text.setAttribute("class", "label");
         text.setAttribute("text-anchor", "middle");
-        // Label stations as A, B, C, D, E, F
         text.textContent = String.fromCharCode(65 + i);
-        stationGroup.appendChild(text);
+        stationIcon.appendChild(text);
+
+        stationGroup.appendChild(stationIcon);
       }
       svg.appendChild(stationGroup);
     }
 
-    // Draw the rail (edges) for the given graph (edge list)
     function drawEdges(edgeList) {
-      // Remove any existing edges group if present
       const existingEdges = document.getElementById("edges");
       if (existingEdges) existingEdges.remove();
 
@@ -228,27 +316,184 @@ print(count_connected_excluding_full(6))
       svg.appendChild(edgeGroup);
     }
 
-    // Display graph variation by index (if valid)
+    // Display a specific variation (user sees 1-indexed)
     function displayGraph(index) {
       if (index < 0 || index >= connectedGraphs.length) return;
-      document.getElementById("graphIndex").textContent = index;
+      document.getElementById("currentIndex").textContent = index + 1;
+      document.getElementById("graphIndexInput").value = index + 1;
+      document.getElementById("graphSlider").value = index;
       const edgeList = connectedGraphs[index];
       drawEdges(edgeList);
+      // Reset train animation when graph changes.
+      resetTrain();
     }
 
-    // Initialize: draw stations once and set up slider
-    drawStations();
-    const slider = document.getElementById("graphSlider");
-    slider.max = connectedGraphs.length - 1;
-    document.getElementById("maxIndex").textContent = connectedGraphs.length - 1;
-    // Show the first variation
-    displayGraph(0);
+    function updateGraphIndex(newIndex) {
+      if (newIndex < 0) newIndex = 0;
+      if (newIndex >= connectedGraphs.length) newIndex = connectedGraphs.length - 1;
+      displayGraph(newIndex);
+    }
 
-    // Update graph when slider moves
-    slider.addEventListener("input", (event) => {
-      const idx = parseInt(event.target.value);
-      displayGraph(idx);
+    document.getElementById("graphSlider").addEventListener("input", (e) => {
+      const idx = parseInt(e.target.value);
+      updateGraphIndex(idx);
     });
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      let current = parseInt(document.getElementById("graphSlider").value);
+      updateGraphIndex(current - 1);
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      let current = parseInt(document.getElementById("graphSlider").value);
+      updateGraphIndex(current + 1);
+    });
+
+    document.getElementById("graphIndexInput").addEventListener("change", (e) => {
+      let idx = parseInt(e.target.value) - 1;
+      updateGraphIndex(idx);
+    });
+
+    // ----- Train Animation -----
+    let trainRoute = [];      // DFS route: array of node indices.
+    let currentSegment = 0;   // current segment index
+    let segmentStartTime = null;
+    const segmentDuration = 1000; // ms per segment
+    let animationFrameId = null;
+    let isAnimating = false;
+    let isPaused = false;
+
+    // Compute a DFS route (with backtracking) on the current graph.
+    function computeDFSRoute(adj) {
+      const route = [];
+      const visited = new Array(n).fill(false);
+      function dfs(u) {
+        visited[u] = true;
+        route.push(u);
+        for (const v of adj[u]) {
+          if (!visited[v]) {
+            dfs(v);
+            route.push(u);
+          }
+        }
+      }
+      dfs(0);
+      return route;
+    }
+
+    function buildAdjacency(edgeList) {
+      const adj = Array.from({length: n}, () => []);
+      edgeList.forEach(([u, v]) => {
+        adj[u].push(v);
+        adj[v].push(u);
+      });
+      return adj;
+    }
+
+    // Create or update the train icon (a simple train drawing).
+    function createTrain(x, y) {
+      let train = document.getElementById("train");
+      if (!train) {
+        train = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        train.setAttribute("id", "train");
+        // Train body
+        const body = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        body.setAttribute("x", -12);
+        body.setAttribute("y", -6);
+        body.setAttribute("width", 24);
+        body.setAttribute("height", 12);
+        body.setAttribute("fill", "#555");
+        train.appendChild(body);
+        // Train wheels
+        const wheel1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        wheel1.setAttribute("cx", -6);
+        wheel1.setAttribute("cy", 8);
+        wheel1.setAttribute("r", 3);
+        wheel1.setAttribute("fill", "#333");
+        train.appendChild(wheel1);
+        const wheel2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        wheel2.setAttribute("cx", 6);
+        wheel2.setAttribute("cy", 8);
+        wheel2.setAttribute("r", 3);
+        wheel2.setAttribute("fill", "#333");
+        train.appendChild(wheel2);
+        svg.appendChild(train);
+      }
+      train.setAttribute("transform", `translate(${x},${y})`);
+      return train;
+    }
+
+    function animateTrain(timestamp) {
+      if (isPaused) {
+        // When paused, do not update; just keep requesting frames.
+        segmentStartTime = null;
+        animationFrameId = requestAnimationFrame(animateTrain);
+        return;
+      }
+      if (!segmentStartTime) segmentStartTime = timestamp;
+      const elapsed = timestamp - segmentStartTime;
+      if (currentSegment >= trainRoute.length - 1) {
+        isAnimating = false;
+        cancelAnimationFrame(animationFrameId);
+        return;
+      }
+      const u = trainRoute[currentSegment];
+      const v = trainRoute[currentSegment + 1];
+      const startPos = stationPositions[u];
+      const endPos = stationPositions[v];
+      const t = Math.min(elapsed / segmentDuration, 1);
+      const curX = startPos.x + (endPos.x - startPos.x) * t;
+      const curY = startPos.y + (endPos.y - startPos.y) * t;
+      createTrain(curX, curY);
+      if (t === 1) {
+        currentSegment++;
+        segmentStartTime = timestamp;
+      }
+      if (isAnimating) {
+        animationFrameId = requestAnimationFrame(animateTrain);
+      }
+    }
+
+    function startTrain() {
+      // Compute DFS route for current graph.
+      const edgeList = connectedGraphs[parseInt(document.getElementById("graphSlider").value)];
+      const adj = buildAdjacency(edgeList);
+      trainRoute = computeDFSRoute(adj);
+      currentSegment = 0;
+      segmentStartTime = null;
+      isAnimating = true;
+      isPaused = false;
+      document.getElementById("pauseTrainBtn").textContent = "Pause";
+      animationFrameId = requestAnimationFrame(animateTrain);
+    }
+
+    function togglePauseTrain() {
+      if (!isAnimating) return; // nothing to do if not animating
+      isPaused = !isPaused;
+      document.getElementById("pauseTrainBtn").textContent = isPaused ? "Resume" : "Pause";
+    }
+
+    function resetTrain() {
+      isAnimating = false;
+      isPaused = false;
+      cancelAnimationFrame(animationFrameId);
+      const train = document.getElementById("train");
+      if (train) train.remove();
+      trainRoute = [];
+      currentSegment = 0;
+      segmentStartTime = null;
+      document.getElementById("pauseTrainBtn").textContent = "Pause";
+    }
+
+    document.getElementById("startTrainBtn").addEventListener("click", startTrain);
+    document.getElementById("pauseTrainBtn").addEventListener("click", togglePauseTrain);
+    document.getElementById("resetTrainBtn").addEventListener("click", resetTrain);
+
+    // Initial drawing
+    drawStations();
+    document.getElementById("graphSlider").max = connectedGraphs.length - 1;
+    document.getElementById("maxIndex").textContent = connectedGraphs.length;
+    displayGraph(0);
   </script>
 </body>
 </html>
