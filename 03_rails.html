@@ -168,7 +168,6 @@ print(count_connected_excluding_full(6))
       <!-- Train animation controls -->
       <button id="startTrainBtn">Start Train</button>
       <button id="pauseTrainBtn">Pause</button>
-      <button id="resetTrainBtn">Reset Train</button>
     </div>
     <svg id="railSvg" class="rail-svg" width="400" height="400" viewBox="0 0 400 400">
       <!-- Stations, edges, and train are drawn via JavaScript -->
@@ -324,8 +323,6 @@ print(count_connected_excluding_full(6))
       document.getElementById("graphSlider").value = index;
       const edgeList = connectedGraphs[index];
       drawEdges(edgeList);
-      // Reset train animation when graph changes.
-      resetTrain();
     }
 
     function updateGraphIndex(newIndex) {
@@ -355,18 +352,165 @@ print(count_connected_excluding_full(6))
     });
 
     // ----- Train Animation -----
-    let trainRoute = [];      // DFS route: array of node indices.
-    let currentSegment = 0;   // current segment index
+    let trainRoute = [];
+    let currentSegment = 0;
     let segmentStartTime = null;
-    const segmentDuration = 1000; // ms per segment
+    const segmentDuration = 1000;
     let animationFrameId = null;
     let isAnimating = false;
     let isPaused = false;
+    let segmentProgress = 0;
 
-    // Compute a DFS route (with backtracking) on the current graph.
+    function animateTrain(timestamp) {
+      // Guard: exit if the train has been stopped.
+      if (!isAnimating) return;
+
+      // If we've reached the end of the route, stop the train.
+      if (currentSegment >= trainRoute.length - 1) {
+        stopTrain();
+        return;
+      }
+
+      if (isPaused) {
+        animationFrameId = requestAnimationFrame(animateTrain);
+        return;
+      }
+
+      if (!segmentStartTime) {
+        segmentStartTime = timestamp - segmentProgress * segmentDuration;
+      }
+
+      const elapsed = timestamp - segmentStartTime;
+      const t = Math.min(elapsed / segmentDuration, 1);
+
+      const u = trainRoute[currentSegment];
+      const v = trainRoute[currentSegment + 1];
+      const startPos = stationPositions[u];
+      const endPos = stationPositions[v];
+
+      const curX = startPos.x + (endPos.x - startPos.x) * t;
+      const curY = startPos.y + (endPos.y - startPos.y) * t;
+
+      createTrain(curX, curY);
+
+      if (t === 1) {
+        currentSegment++;
+        segmentStartTime = null;
+        segmentProgress = 0;
+      } else {
+        segmentProgress = t;
+      }
+
+      // Check again: if we've reached the end, stop.
+      if (currentSegment >= trainRoute.length - 1) {
+        stopTrain();
+        return;
+      }
+
+      animationFrameId = requestAnimationFrame(animateTrain);
+    }
+
+    function createTrain(x, y) {
+      let train = document.getElementById("train");
+      if (!train) {
+        train = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        train.setAttribute("id", "train");
+
+        const body = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        body.setAttribute("x", -12);
+        body.setAttribute("y", -6);
+        body.setAttribute("width", 24);
+        body.setAttribute("height", 12);
+        body.setAttribute("fill", "#555");
+        train.appendChild(body);
+
+        const wheel1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        wheel1.setAttribute("cx", -6);
+        wheel1.setAttribute("cy", 8);
+        wheel1.setAttribute("r", 3);
+        wheel1.setAttribute("fill", "#333");
+        train.appendChild(wheel1);
+
+        const wheel2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        wheel2.setAttribute("cx", 6);
+        wheel2.setAttribute("cy", 8);
+        wheel2.setAttribute("r", 3);
+        wheel2.setAttribute("fill", "#333");
+        train.appendChild(wheel2);
+
+        svg.appendChild(train);
+      }
+      train.setAttribute("transform", `translate(${x},${y})`);
+    }
+
+    function startTrain() {
+      stopTrain(); // Restart from scratch if running
+      computeRoute();
+      isAnimating = true;
+      isPaused = false;
+      segmentStartTime = null;
+      segmentProgress = 0;
+      currentSegment = 0;
+      updateButtons();
+      animationFrameId = requestAnimationFrame(animateTrain);
+    }
+
+    function computeRoute() {
+      const edgeList = connectedGraphs[parseInt(document.getElementById("graphSlider").value)];
+      const adj = buildAdjacency(edgeList);
+      trainRoute = computeDFSRoute(adj);
+    }
+
+    function stopTrain() {
+      isAnimating = false;
+      isPaused = false;
+      cancelAnimationFrame(animationFrameId);
+      const train = document.getElementById("train");
+      if (train) train.remove();
+      currentSegment = 0;
+      segmentProgress = 0;
+      updateButtons();
+    }
+
+    function togglePauseTrain() {
+      // Only allow pause/resume if the train is actively animating and not finished
+      if (!isAnimating || currentSegment >= trainRoute.length - 1) {
+        return;
+      }
+      isPaused = !isPaused;
+      if (!isPaused) {
+        // Resume from the current position by adjusting the segment start time based on progress
+        segmentStartTime = performance.now() - segmentProgress * segmentDuration;
+        animationFrameId = requestAnimationFrame(animateTrain);
+      }
+      updateButtons();
+    }
+
+    function updateButtons() {
+      // "Start/Restart" button is always enabled.
+      document.getElementById("startTrainBtn").textContent = isAnimating ? "Restart" : "Start";
+
+      // "Pause/Resume" button:
+      const pauseBtn = document.getElementById("pauseTrainBtn");
+      pauseBtn.textContent = isPaused ? "Resume" : "Pause";
+      // Disable pause/resume if the train isn't animating or has finished its route.
+      pauseBtn.disabled = !isAnimating || currentSegment >= trainRoute.length - 1;
+    }
+
+    // Compute the adjacency list
+    function buildAdjacency(edgeList) {
+      const adj = Array.from({ length: n }, () => []);
+      edgeList.forEach(([u, v]) => {
+        adj[u].push(v);
+        adj[v].push(u);
+      });
+      return adj;
+    }
+
     function computeDFSRoute(adj) {
       const route = [];
       const visited = new Array(n).fill(false);
+
       function dfs(u) {
         visited[u] = true;
         route.push(u);
@@ -381,113 +525,12 @@ print(count_connected_excluding_full(6))
       return route;
     }
 
-    function buildAdjacency(edgeList) {
-      const adj = Array.from({length: n}, () => []);
-      edgeList.forEach(([u, v]) => {
-        adj[u].push(v);
-        adj[v].push(u);
-      });
-      return adj;
-    }
-
-    // Create or update the train icon (a simple train drawing).
-    function createTrain(x, y) {
-      let train = document.getElementById("train");
-      if (!train) {
-        train = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        train.setAttribute("id", "train");
-        // Train body
-        const body = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        body.setAttribute("x", -12);
-        body.setAttribute("y", -6);
-        body.setAttribute("width", 24);
-        body.setAttribute("height", 12);
-        body.setAttribute("fill", "#555");
-        train.appendChild(body);
-        // Train wheels
-        const wheel1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        wheel1.setAttribute("cx", -6);
-        wheel1.setAttribute("cy", 8);
-        wheel1.setAttribute("r", 3);
-        wheel1.setAttribute("fill", "#333");
-        train.appendChild(wheel1);
-        const wheel2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        wheel2.setAttribute("cx", 6);
-        wheel2.setAttribute("cy", 8);
-        wheel2.setAttribute("r", 3);
-        wheel2.setAttribute("fill", "#333");
-        train.appendChild(wheel2);
-        svg.appendChild(train);
-      }
-      train.setAttribute("transform", `translate(${x},${y})`);
-      return train;
-    }
-
-    function animateTrain(timestamp) {
-      if (isPaused) {
-        // When paused, do not update; just keep requesting frames.
-        segmentStartTime = null;
-        animationFrameId = requestAnimationFrame(animateTrain);
-        return;
-      }
-      if (!segmentStartTime) segmentStartTime = timestamp;
-      const elapsed = timestamp - segmentStartTime;
-      if (currentSegment >= trainRoute.length - 1) {
-        isAnimating = false;
-        cancelAnimationFrame(animationFrameId);
-        return;
-      }
-      const u = trainRoute[currentSegment];
-      const v = trainRoute[currentSegment + 1];
-      const startPos = stationPositions[u];
-      const endPos = stationPositions[v];
-      const t = Math.min(elapsed / segmentDuration, 1);
-      const curX = startPos.x + (endPos.x - startPos.x) * t;
-      const curY = startPos.y + (endPos.y - startPos.y) * t;
-      createTrain(curX, curY);
-      if (t === 1) {
-        currentSegment++;
-        segmentStartTime = timestamp;
-      }
-      if (isAnimating) {
-        animationFrameId = requestAnimationFrame(animateTrain);
-      }
-    }
-
-    function startTrain() {
-      // Compute DFS route for current graph.
-      const edgeList = connectedGraphs[parseInt(document.getElementById("graphSlider").value)];
-      const adj = buildAdjacency(edgeList);
-      trainRoute = computeDFSRoute(adj);
-      currentSegment = 0;
-      segmentStartTime = null;
-      isAnimating = true;
-      isPaused = false;
-      document.getElementById("pauseTrainBtn").textContent = "Pause";
-      animationFrameId = requestAnimationFrame(animateTrain);
-    }
-
-    function togglePauseTrain() {
-      if (!isAnimating) return; // nothing to do if not animating
-      isPaused = !isPaused;
-      document.getElementById("pauseTrainBtn").textContent = isPaused ? "Resume" : "Pause";
-    }
-
-    function resetTrain() {
-      isAnimating = false;
-      isPaused = false;
-      cancelAnimationFrame(animationFrameId);
-      const train = document.getElementById("train");
-      if (train) train.remove();
-      trainRoute = [];
-      currentSegment = 0;
-      segmentStartTime = null;
-      document.getElementById("pauseTrainBtn").textContent = "Pause";
-    }
-
+    // Attach buttons
     document.getElementById("startTrainBtn").addEventListener("click", startTrain);
     document.getElementById("pauseTrainBtn").addEventListener("click", togglePauseTrain);
-    document.getElementById("resetTrainBtn").addEventListener("click", resetTrain);
+
+    // Initial state
+    updateButtons();
 
     // Initial drawing
     drawStations();
