@@ -8,9 +8,20 @@
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            margin: 20px;
             background-color: #f9f9f9;
             color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 20px;
+            border-radius: 8px;
         }
         h1, h2, h3 {
             color: #444;
@@ -27,6 +38,10 @@
             padding: 10px;
             border-radius: 4px;
             overflow-x: auto;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .section {
             margin-bottom: 30px;
@@ -38,10 +53,41 @@
             height: auto;
             margin-bottom: 20px;
         }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 4px 8px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+        #copyPopup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
+<div id="copyPopup">Code copied!</div>
+
+<div class="container">
     <h1>Triangle Puzzle Solution</h1>
 
     <div class="section">
@@ -59,7 +105,9 @@
         <p>
             If we assume that the image is correctly scaled and that the pixel values represent real-world distances, the calculation proceeds as follows (assuming the side of the bottom square is 1 unit):
         </p>
-        <pre><code>
+        <pre>
+            <button class="copy-btn" onclick="copyCode('code1')">Copy</button>
+<code id="code1">
 def triangle_area(p1, p2, p3):
     (x1, y1), (x2, y2), (x3, y3) = p1, p2, p3
     return 0.5 * abs(x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))
@@ -83,9 +131,8 @@ C_m = (C_px[0] * scale, C_px[1] * scale)
 
 # Calculate triangle area
 area_units = triangle_area(A_m, B_m, C_m)
-print(area_units)
-        </code></pre>
-
+print(area_units)</code>
+        </pre>
         <p>
             Result: The area of the red triangle is approximately <strong>1.96 units squared</strong>.
         </p>
@@ -96,15 +143,14 @@ print(area_units)
         <p>
             If the image is not to scale, but the alignment of squares and line crossings is taken as correct, the middle square’s side is determined by the following geometric relationship (assuming the corner of the triangle is the bottom left corner of the middle square rather than top left of the bottom square):
         </p>
-        <div style="width: 361px;">
-            <img src="squares.png" alt="Triangle Puzzle Image (corrected)">
-        </div>
-        <pre><code>
+        <pre>
+            <button class="copy-btn" onclick="copyCode('code2')">Copy</button>
+<code id="code2">
 import sympy
 
 x = sympy.Symbol('x', positive=True)
-S_top = 6 * sympy.sqrt(sympy.pi)  # Side of top square
-S_bottom = sympy.sqrt(5)          # Side of bottom square
+S_top = 6 * sympy.sqrt(sympy.pi)
+S_bottom = sympy.sqrt(5)
 
 # Geometric constraint equation:
 equation = sympy.Eq(x**2 + S_bottom*x - 12*sympy.sqrt(5*sympy.pi), 0)
@@ -116,17 +162,17 @@ Tx, Ty = -S_top, S_bottom + x + S_top
 Bx, By = -S_bottom, 0
 Mx, My = -x, S_bottom
 
-area_expr = 0.5*sympy.Abs(
-    Tx*(By - My) + Bx*(My - Ty) + Mx*(Ty - By)
+area_expr = 0.5 * sympy.Abs(
+    Tx * (By - My) + Bx * (My - Ty) + Mx * (Ty - By)
 )
 area_sol = area_expr.subs(x, x_sol)
-print(area_sol)
-        </code></pre>
-
+print(area_sol.evalf())</code>
+        </pre>
         <p>
             Result: The side of the middle square is approximately <strong>5.87</strong>, and the triangle’s area is approximately <strong>24.64 units squared</strong>.
         </p>
     </div>
+
 
     <div class="section">
         <h2>Conclusion</h2>
@@ -138,6 +184,18 @@ print(area_sol)
             <li>Using geometric reasoning, the triangle’s area is ≈ <strong>24.64 units squared</strong>.</li>
         </ul>
     </div>
+</div>
+
+<script>
+function copyCode(id) {
+    const codeBlock = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(codeBlock).then(() => {
+        const popup = document.getElementById('copyPopup');
+        popup.style.display = 'block';
+        setTimeout(() => { popup.style.display = 'none'; }, 2000);
+    });
+}
+</script>
 
 </body>
 </html>
