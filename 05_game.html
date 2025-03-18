@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Domino Game Animation</title>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #controls {
+      margin-bottom: 10px;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(12, 30px);
+      grid-gap: 2px;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      transition: background-color 0.3s;
+    }
+    .removed {
+      color: #fff;
+    }
+    .ben-move {
+      background-color: #f88;
+    }
+    .lily-move {
+      background-color: #8f8;
+    }
+    #explanation {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label>
+      <input type="radio" name="benStrategy" value="worst" checked>
+      Worst-case Ben
+    </label>
+    <label>
+      <input type="radio" name="benStrategy" value="best">
+      Best-case Ben
+    </label>
+    <button id="startBtn">Start Simulation</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+
+  <div id="explanation">
+    <h2>Explanation</h2>
+    The game can be represented as cell picking on a 12x12 grid, which gives 144 cells.
+    <p><strong>Worst-case play:</strong> On each turn Ben picks a cell, and this makes that particular double-cell selection no longer
+        viable for Lily. This means every full cycle (Ben then Lily) uses up four cells – so Lily gets \(144 / 4 = 36\) pairs of numbers.</p>
+    <p><strong>Best-case play:</strong> After his very first move (when no cell is yet removed) Ben ruins a two-cell
+        combination. But thereafter he always chooses a cell that is already part of a ruined two-cell. That way his
+        moves do not reduce the number of intact two-cells. Consequently, each cycle uses up 3 pairs of Lily can claim one domino per cycle – ending
+        up with 48 pairs of numbers.</p>
+  </div>
+
+  <div id="status">Lily's Dominoes Claimed: 0</div>
+  <div id="board"></div>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const rows = 12, cols = 12;
+    let board = [];
+    let dominoes = [];
+    let cellToDomino = {}; // Maps "r,c" to a domino index.
+    let lilyCount = 0;
+    let simulationAbort = false;
+    let simulationRunning = false;
+
+    // Initialize the 12x12 board.
+    function initBoard() {
+      board = [];
+      boardElement.innerHTML = '';
+      for (let r = 1; r <= rows; r++) {
+        for (let c = 1; c <= cols; c++) {
+          const cellDiv = document.createElement('div');
+          cellDiv.classList.add('cell');
+          cellDiv.id = `cell-${r}-${c}`;
+          cellDiv.dataset.row = r;
+          cellDiv.dataset.col = c;
+          boardElement.appendChild(cellDiv);
+          board.push({ r, c, element: cellDiv, removed: false });
+        }
+      }
+    }
+
+    // Initialize domino tiling (72 dominoes covering 144 cells).
+    function initDominoes() {
+      dominoes = [];
+      cellToDomino = {};
+      // Create horizontal dominoes: pair cell (r, c) with (r, c+1) for every odd c.
+      for (let r = 1; r <= rows; r++) {
+        for (let c = 1; c <= cols; c += 2) {
+          const dIndex = dominoes.length;
+          const domino = {
+            cells: [{ r: r, c: c }, { r: r, c: c+1 }],
+            intact: true,
+            picked: false
+          };
+          dominoes.push(domino);
+          cellToDomino[`${r},${c}`] = dIndex;
+          cellToDomino[`${r},${c+1}`] = dIndex;
+        }
+      }
+    }
+
+    // Update status display.
+    function updateStatus() {
+      document.getElementById('status').innerText = "Lily's Dominoes Claimed: " + lilyCount;
+    }
+
+    // Simple sleep helper.
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Mark a cell as removed and color it.
+    function markCellRemoved(r, c, className) {
+      const cellDiv = document.getElementById(`cell-${r}-${c}`);
+      if (cellDiv) {
+        cellDiv.classList.add(className, 'removed');
+      }
+    }
+
+    // Simulation loop.
+    async function simulate() {
+      simulationRunning = true;
+      startBtn.disabled = true;
+      lilyCount = 0;
+      updateStatus();
+
+      while (true) {
+        if (simulationAbort) break;
+
+        // Find available dominoes (not yet picked and still intact).
+        const availableDominoIndices = dominoes
+          .map((d, i) => (!d.picked && d.intact ? i : -1))
+          .filter(i => i !== -1);
+        if (availableDominoIndices.length === 0) break;
+
+        // BEN'S MOVE:
+        const strategy = document.querySelector('input[name="benStrategy"]:checked').value;
+        let benCell = null;
+        if (strategy === "worst") {
+          // Worst-case: pick a cell from the first available intact domino.
+          const idx = availableDominoIndices[0];
+          benCell = dominoes[idx].cells[0];
+        } else { // best-case
+          // Best-case: if there exists a cell (not removed) from a non-intact domino, choose it.
+          const harmlessCandidates = board.filter(cell => {
+            if (cell.removed) return false;
+            const dIdx = cellToDomino[`${cell.r},${cell.c}`];
+            return dIdx !== undefined && (dominoes[dIdx].intact === false);
+          });
+          if (harmlessCandidates.length > 0) {
+            benCell = harmlessCandidates[0];
+          } else {
+            // Fallback on the first available intact domino (applies on the very first move).
+            const idx = availableDominoIndices[0];
+            benCell = dominoes[idx].cells[0];
+          }
+        }
+
+        // Execute Ben's move if that cell hasn't already been picked.
+        const boardCell = board.find(cell => cell.r === benCell.r && cell.c === benCell.c);
+        if (benCell && !boardCell.removed) {
+          markCellRemoved(benCell.r, benCell.c, 'ben-move');
+          boardCell.removed = true;
+        }
+
+        await sleep(500);
+        if (simulationAbort) break;
+
+        // If Ben's move was from an intact domino, mark that domino as ruined.
+        const dIdx = cellToDomino[`${benCell.r},${benCell.c}`];
+        if (dIdx !== undefined && dominoes[dIdx].intact) {
+          dominoes[dIdx].intact = false;
+        }
+
+        // LILY'S MOVE:
+        const availableAfterBen = dominoes
+          .map((d, i) => (!d.picked && d.intact ? i : -1))
+          .filter(i => i !== -1);
+        if (availableAfterBen.length === 0) break;
+
+        // Lily claims the first available intact domino.
+        const chosenDominoIndex = availableAfterBen[0];
+        dominoes[chosenDominoIndex].picked = true;
+        const chosenDomino = dominoes[chosenDominoIndex];
+        chosenDomino.cells.forEach(cell => {
+          markCellRemoved(cell.r, cell.c, 'lily-move');
+          board.find(c => c.r === cell.r && c.c === cell.c).removed = true;
+        });
+        lilyCount++;
+        updateStatus();
+
+        await sleep(500);
+      }
+      simulationRunning = false;
+      startBtn.disabled = false;
+    }
+
+    // Start button event.
+    startBtn.addEventListener('click', () => {
+      simulationAbort = false;
+      simulate();
+    });
+
+    // Reset button stops the simulation and resets the board.
+    resetBtn.addEventListener('click', () => {
+      simulationAbort = true;
+      setTimeout(() => {
+        simulationRunning = false;
+        simulationAbort = false;
+        lilyCount = 0;
+        initBoard();
+        initDominoes();
+        updateStatus();
+        startBtn.disabled = false;
+      }, 100);
+    });
+
+    // Initial setup.
+    initBoard();
+    initDominoes();
+  </script>
+</body>
+</html>
