@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Civil Service Tea Consumption Estimate</title>
     <style>
         body {
@@ -13,6 +13,7 @@
         }
         h1 {
             color: #2c3e50;
+            text-align: center;
         }
         .container {
             max-width: 800px;
@@ -49,60 +50,79 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Estimated Civil Service Tea Consumption</h1>
-
-        <p><strong>Step 1:</strong> Get the latest total number of civil servants.</p>
-        <p>According to the Office for National Statistics (ONS), the total number of civil servants as of the 17 December 2024 release is <strong>548,405</strong>. The next update is expected on 20 March 2025, so this value could be revised soon.</p>
-
-        <p><strong>Step 2:</strong> Find the average fraction of tea drinkers and how many cups per day they drink.</p>
-        <ul>
-            <li>98% of Brits drink tea daily.</li>
-            <li>The distribution of tea consumption during working hours:</li>
-            <table>
-                <tr>
-                    <th>Consumption Group</th>
-                    <th>Percentage</th>
-                    <th>Estimated Cups</th>
-                </tr>
-                <tr>
-                    <td>29% drink two cups</td>
-                    <td>29%</td>
-                    <td>2 cups</td>
-                </tr>
-                <tr>
-                    <td>24% drink three cups</td>
-                    <td>24%</td>
-                    <td>3 cups</td>
-                </tr>
-                <tr>
-                    <td>6% drink more than five cups (assumed to be 6)</td>
-                    <td>6%</td>
-                    <td>6 cups</td>
-                </tr>
-                <tr>
-                    <td>Remaining 41% (assumed to be 3 cups)</td>
-                    <td>41%</td>
-                    <td>3 cups</td>
-                </tr>
-            </table>
-            <p>Weighted Average Calculation:</p>
-            <p>(0.29 × 2) + (0.24 × 3) + (0.06 × 6) + (0.41 × 3) = <strong>2.89 cups/person/day</strong></p>
-            <p>Factoring in tea outside of work (morning, evening), it’s reasonable to estimate a total of <strong>3.5 cups/person/day</strong>.</p>
-        </ul>
-
-        <p><strong>Step 3:</strong> Final Estimate:</p>
-        <p>Multiply the total number of civil servants by the fraction of tea drinkers and the average cups per tea drinker:</p>
-        <p><strong>548,405 × 0.98 × 3.5 ≈ 1,881,029 cups/day</strong></p>
-
-        <p>✅ Estimated daily tea consumption by UK civil servants: <strong>Approximately 1.88 million cups/day</strong></p>
-
-        <h2>Resources:</h2>
-        <ul>
-            <li><a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/publicsectorpersonnel/datasets/publicsectoremploymentreferencetable" target="_blank">ONS Public Sector Employment Dataset</a></li>
-            <li><a href="https://www.prnewswire.com/news-releases/new-2024-tea-census-study-reveals-exactly-how-the-nation-takes-their-tea-with-some-surprising-quirks-ahead-of-international-tea-day---21st-may-2024-302149047.html" target="_blank">2024 Tea Census Study</a></li>
-            <li><a href="https://www.tea.co.uk/assets/uploads/files/news/39ef5-uk-tea-census-report-2022-web.pdf" target="_blank">UK Tea Census Report 2022 (PDF)</a></li>
-        </ul>
+<header>
+    <div id="nav" style="font-family: sans-serif; padding: 10px; background: #f0f0f0; margin-bottom: 20px;">
+        <a href="index.html" style="margin-right: 10px;">Puzzle index</a>
+        <a href="01_tea.html" style="margin-right: 10px;">1. Tea</a>
+        <a href="02_teacher.html" style="margin-right: 10px;">2. Teacher</a>
+        <a href="03_rails.html" style="margin-right: 10px;">3. Rails</a>
+        <a href="04_triangle.html" style="margin-right: 10px;">4. Triangle</a>
+        <a href="05_game.html">5. Game Puzzle</a>
     </div>
+</header>
+<div class="container">
+    <h1>Estimated Civil Service Tea Consumption</h1>
+
+    <p><strong>Step 1:</strong> Get the latest total number of civil servants.</p>
+    <p>According to the Office for National Statistics (ONS), the total number of civil servants as of the 17 December
+        2024 release is <strong>548,405</strong>. The next update is expected on 20 March 2025, so this value could be
+        revised soon.</p>
+
+    <p><strong>Step 2:</strong> Find the average fraction of tea drinkers and how many cups per day they drink.</p>
+    <ul>
+        <li>98% of Brits drink tea daily.</li>
+        <li>The distribution of tea consumption during working hours:</li>
+        <table>
+            <tr>
+                <th>Consumption Group</th>
+                <th>Percentage</th>
+                <th>Estimated Cups</th>
+            </tr>
+            <tr>
+                <td>29% drink two cups</td>
+                <td>29%</td>
+                <td>2 cups</td>
+            </tr>
+            <tr>
+                <td>24% drink three cups</td>
+                <td>24%</td>
+                <td>3 cups</td>
+            </tr>
+            <tr>
+                <td>6% drink more than five cups (assumed to be 6)</td>
+                <td>6%</td>
+                <td>6 cups</td>
+            </tr>
+            <tr>
+                <td>Remaining 41% (assumed to be 3 cups)</td>
+                <td>41%</td>
+                <td>3 cups</td>
+            </tr>
+        </table>
+        <p>Weighted Average Calculation:</p>
+        <p>(0.29 × 2) + (0.24 × 3) + (0.06 × 6) + (0.41 × 3) = <strong>2.89 cups/person/day</strong></p>
+        <p>Factoring in tea outside of work (morning, evening), it’s reasonable to estimate a total of <strong>3.5
+            cups/person/day</strong>.</p>
+    </ul>
+
+    <p><strong>Step 3:</strong> Final Estimate:</p>
+    <p>Multiply the total number of civil servants by the fraction of tea drinkers and the average cups per tea
+        drinker:</p>
+    <p><strong>548,405 × 0.98 × 3.5 ≈ 1,881,029 cups/day</strong></p>
+
+    <p>✅ Estimated daily tea consumption by UK civil servants: <strong>Approximately 1.88 million cups/day</strong></p>
+
+    <h2>Resources:</h2>
+    <ul>
+        <li>
+            <a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/publicsectorpersonnel/datasets/publicsectoremploymentreferencetable"
+               target="_blank">ONS Public Sector Employment Dataset</a></li>
+        <li>
+            <a href="https://www.prnewswire.com/news-releases/new-2024-tea-census-study-reveals-exactly-how-the-nation-takes-their-tea-with-some-surprising-quirks-ahead-of-international-tea-day---21st-may-2024-302149047.html"
+               target="_blank">2024 Tea Census Study</a></li>
+        <li><a href="https://www.tea.co.uk/assets/uploads/files/news/39ef5-uk-tea-census-report-2022-web.pdf"
+               target="_blank">UK Tea Census Report 2022 (PDF)</a></li>
+    </ul>
+</div>
 </body>
 </html>

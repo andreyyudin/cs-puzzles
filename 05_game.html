@@ -1,82 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Ben and Lily play a game</title>
-  <!-- MathJax for rendering math formulas -->
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <style>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f8ff;
-      margin: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      font-size: 1.2em;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    pre {
-      background: #eee;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
-    #board {
-      display: grid;
-      grid-template-columns: repeat(12, 30px);
-      grid-gap: 2px;
-      margin-bottom: 20px;
-    }
-    .cell {
-      width: 30px; height: 30px;
-      background-color: #eee;
-      border: 1px solid #ccc;
-      transition: background-color 0.2s;
-      text-align: center; line-height: 30px; font-size: 12px;
-    }
-    .removed { color: #fff !important; }
-    .ben-move { background-color: #f88 !important; }
-    .lily-move { background-color: #8f8 !important; }
-    #explanation {
-      margin-bottom: 20px;
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <title>Ben and Lily play a game</title>
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+          text-align: center;
+        }
+        pre {
+          background: #eee;
+          padding: 10px;
+          border-radius: 5px;
+          overflow-x: auto;
+          white-space: pre-wrap;
+        }
+        #board {
+          display: grid;
+          grid-template-columns: repeat(12, 30px);
+          grid-gap: 2px;
+          margin-bottom: 20px;
+        }
+        .cell {
+          width: 30px; height: 30px;
+          background-color: #eee;
+          border: 1px solid #ccc;
+          transition: background-color 0.2s;
+          text-align: center; line-height: 30px; font-size: 12px;
+        }
+        .removed { color: #fff !important; }
+        .ben-move { background-color: #f88 !important; }
+        .lily-move { background-color: #8f8 !important; }
+        #explanation {
+          margin-bottom: 20px;
+        }
+        p {
+            line-height: 1.6;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
+<header>
+    <div id="nav" style="font-family: sans-serif; padding: 10px; background: #f0f0f0; margin-bottom: 20px;">
+        <a href="index.html" style="margin-right: 10px;">Puzzle index</a>
+        <a href="01_tea.html" style="margin-right: 10px;">1. Tea</a>
+        <a href="02_teacher.html" style="margin-right: 10px;">2. Teacher</a>
+        <a href="03_rails.html" style="margin-right: 10px;">3. Rails</a>
+        <a href="04_triangle.html" style="margin-right: 10px;">4. Triangle</a>
+        <a href="05_game.html">5. Game Puzzle</a>
+    </div>
+</header>
+<div class="container">
     <h1>Ben and Lily play a game</h1>
     <div id="explanation">
-      The game can be represented as cell picking on a 12x12 grid, which gives 144 cells.
-      <p><strong>Worst-case play:</strong> On each turn Ben picks a cell in a way that blocks Lily's double-cell
-        selection in as many ways as possible. This means every full cycle (Ben then Lily) uses four cells – so Lily
-        gets \(144 / 4 = 36\) pairs of numbers.</p>
-      <p><strong>Best-case play:</strong> After his very first move (when no cell is yet removed) Ben ruins a two-cell
-        combination. But thereafter he always chooses a cell that is already part of a ruined two-cell. That way his
-        moves do not reduce the number of intact two-cells. Consequently, each cycle uses up 3 pairs of cells and Lily
-        can end up with 48 pairs of numbers.</p>
+        The game can be represented as cell picking on a 12x12 grid, which gives 144 cells.
+        <p><strong>Worst-case play:</strong> On each turn Ben picks a cell in a way that blocks Lily's double-cell
+            selection in as many ways as possible. This means every full cycle (Ben then Lily) uses four cells – so Lily
+            gets \(144 / 4 = 36\) pairs of numbers.</p>
+        <p><strong>Best-case play:</strong> After his very first move (when no cell is yet removed) Ben ruins a two-cell
+            combination. But thereafter he always chooses a cell that is already part of a ruined two-cell. That way his
+            moves do not reduce the number of intact two-cells. Consequently, each cycle uses up 3 pairs of cells and
+            Lily
+            can end up with 48 pairs of numbers.</p>
     </div>
-    <div>
-      <label><input type="radio" name="benStrategy" value="worst" checked>Worst‑case play</label>
-      <label><input type="radio" name="benStrategy" value="best">Best‑case play</label>
-      &nbsp;&nbsp;|&nbsp;&nbsp;
-      <label><input type="radio" name="turnOrder" value="benFirst" checked>Ben First</label>
-      <label><input type="radio" name="turnOrder" value="lilyFirst">Lily First</label>
+    <div style="padding-bottom: 10px;">
+        <label><input type="radio" name="benStrategy" value="worst" checked>Worst‑case play</label>
+        <label><input type="radio" name="benStrategy" value="best">Best‑case play</label>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <label><input type="radio" name="turnOrder" value="benFirst" checked>Ben First</label>
+        <label><input type="radio" name="turnOrder" value="lilyFirst">Lily First</label>
     </div>
     <button id="startBtn">Start</button>
     <button id="resetBtn">Reset</button>
     <p id="status"></p>
     <div id="board"></div>
-  </div>
+</div>
 
-  <script>
+<script>
     const N = 12;
     let board = [];    // board[r][c] = { removed: bool, element: <div> }
     let pairs = [];    // each = { cells: [ {r,c}, {r,c} ], removed: bool }
@@ -299,6 +323,6 @@
     };
 
     initBoard();
-  </script>
+</script>
 </body>
 </html>

@@ -1,134 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>6 Railway Stations Connectivity</title>
-  <!-- MathJax for rendering math formulas -->
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f8ff;
-      margin: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    pre {
-      background: #eee;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
-    .formula {
-      text-align: center;
-      font-size: 1.2em;
-      margin: 20px 0;
-    }
-    .formula-explanation {
-      font-size: 1.2em;
-      margin: 20px 0;
-    }
-    /* Rail network SVG styles */
-    .rail-svg {
-      display: block;
-      margin: auto;
-      background: #fff;
-      border: 1px solid #ccc;
-    }
-    /* Draw railroads as dashed lines */
-    .rail {
-      stroke: #8B4513;
-      stroke-width: 2;
-      stroke-dasharray: 6, 4;
-    }
-    /* Station icons will be drawn as groups, so these styles apply inside them */
-    .station-icon rect, .station-icon polygon {
-      fill: #4682B4;
-      stroke: #000;
-      stroke-width: 1;
-    }
-    .label {
-      font-family: sans-serif;
-      font-size: 12px;
-      fill: #000;
-    }
-    /* Controls styling */
-    .control-container {
-      text-align: center;
-      margin: 20px 0;
-    }
-    .control-container input[type="number"] {
-      width: 60px;
-      text-align: center;
-    }
-    .control-container button {
-      margin: 0 10px;
-      padding: 5px 10px;
-    }
-    /* In-page popup for copy confirmation */
-    #copyPopup {
-      display: none;
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #4CAF50;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 5px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      z-index: 1000;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>6 Railway Stations Connectivity</title>
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+          text-align: center;
+        }
+        pre {
+          background: #eee;
+          padding: 10px;
+          border-radius: 5px;
+          overflow-x: auto;
+          white-space: pre-wrap;
+        }
+        .formula {
+          text-align: center;
+          margin: 20px 0;
+        }
+        .formula-explanation {
+          margin: 20px 0;
+        }
+        p {
+            line-height: 1.6;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        /* Rail network SVG styles */
+        .rail-svg {
+          display: block;
+          margin: auto;
+          background: #fff;
+          border: 1px solid #ccc;
+        }
+        /* Draw railroads as dashed lines */
+        .rail {
+          stroke: #8B4513;
+          stroke-width: 2;
+          stroke-dasharray: 6, 4;
+        }
+        /* Station icons will be drawn as groups, so these styles apply inside them */
+        .station-icon rect, .station-icon polygon {
+          fill: #4682B4;
+          stroke: #000;
+          stroke-width: 1;
+        }
+        .label {
+          font-family: sans-serif;
+          font-size: 12px;
+          fill: #000;
+        }
+        /* Controls styling */
+        .control-container {
+          text-align: center;
+          margin: 20px 0;
+        }
+        .control-container input[type="number"] {
+          width: 60px;
+          text-align: center;
+        }
+        .control-container button {
+          margin: 0 10px;
+          padding: 5px 10px;
+        }
+        /* In-page popup for copy confirmation */
+        #copyPopup {
+          display: none;
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #4CAF50;
+          color: #fff;
+          padding: 10px 20px;
+          border-radius: 5px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          z-index: 1000;
+        }
+    </style>
 </head>
 <body>
-  <!-- In-page copy confirmation popup -->
-  <div id="copyPopup">Python code copied!</div>
-  <div class="container">
+<header>
+    <div id="nav" style="font-family: sans-serif; padding: 10px; background: #f0f0f0; margin-bottom: 20px;">
+        <a href="index.html" style="margin-right: 10px;">Puzzle index</a>
+        <a href="01_tea.html" style="margin-right: 10px;">1. Tea</a>
+        <a href="02_teacher.html" style="margin-right: 10px;">2. Teacher</a>
+        <a href="03_rails.html" style="margin-right: 10px;">3. Rails</a>
+        <a href="04_triangle.html" style="margin-right: 10px;">4. Triangle</a>
+        <a href="05_game.html">5. Game Puzzle</a>
+    </div>
+</header>
+<div class="container">
+    <!-- In-page copy confirmation popup -->
+    <div id="copyPopup">Python code copied!</div>
     <h1>6 Railway Stations Connectivity</h1>
     <div class="formula">
-      <!-- Math formula displayed using MathJax -->
+        <!-- Math formula displayed using MathJax -->
         <p>The formula to calculate the number of ways the stations can remain connected when at least one line is
             closed:</p>
-      $$total = C(n) - 1,$$
+        $$total = C(n) - 1,$$
     </div>
     <div class="formula-explanation">
-      <p>where:</p>
-      <ul>
-        <li>
-          \(C(n)\) is the number of ways to keep all train stations connected when there are \( n \) stations.
-        </li>
-        <li>
-          \(- 1\) — because we do not count the case where all railway lines remain open (no lines are closed).
-        </li>
-      </ul>
-      <p>And \(C(n)\) is calculated as:</p>
+        <p>where:</p>
+        <ul>
+            <li>
+                \(C(n)\) is the number of ways to keep all train stations connected when there are \( n \) stations.
+            </li>
+            <li>
+                \(- 1\) — because we do not count the case where all railway lines remain open (no lines are closed).
+            </li>
+        </ul>
+        <p>And \(C(n)\) is calculated as:</p>
     </div>
     <div class="formula">
-      <!-- Math formula displayed using MathJax -->
-      $$C(n)=2^{\binom{n}{2}}-\sum_{k=1}^{n-1}\binom{n-1}{\,k-1}C(k)2^{\binom{n-k}{2}},$$
+        <!-- Math formula displayed using MathJax -->
+        $$C(n)=2^{\binom{n}{2}}-\sum_{k=1}^{n-1}\binom{n-1}{\,k-1}C(k)2^{\binom{n-k}{2}},$$
     </div>
     <div class="formula-explanation">
-      <p>where:</p>
-      <ul>
-        <li>
-          \( 2^{\binom{n}{2}}\) is the total number of possible railway networks between \( n \) stations.
-          The base \(2\) comes from the fact that each possible railway line between two stations can either be
-          open or closed. The term \( \binom{n}{2} \) counts how many different pairs of stations there are
-          (which equals the number of possible railway lines).
-        </li>
-        <li>
-          The summation subtracts the cases where the network becomes disconnected — for example, when some stations form a separate, isolated group.
-        </li>
-      </ul>
-      <p>The number of ways to close at least one railway line while keeping all stations connected for \( n = 6 \) is <strong>26,703</strong>.</p>
+        <p>where:</p>
+        <ul>
+            <li>
+                \( 2^{\binom{n}{2}}\) is the total number of possible railway networks between \( n \) stations.
+                The base \(2\) comes from the fact that each possible railway line between two stations can either be
+                open or closed. The term \( \binom{n}{2} \) counts how many different pairs of stations there are
+                (which equals the number of possible railway lines).
+            </li>
+            <li>
+                The summation subtracts the cases where the network becomes disconnected — for example, when some
+                stations form a separate, isolated group.
+            </li>
+        </ul>
+        <p>The number of ways to close at least one railway line while keeping all stations connected for \( n = 6 \) is
+            <strong>26,703</strong>.</p>
     </div>
 
     <h2>Python Code</h2>
@@ -157,24 +182,24 @@ print(count_connected_excluding_full(6))
 
     <h2>Rail Network Visualization</h2>
     <div class="control-container">
-      <button id="prevBtn">Previous</button>
-      <input type="number" id="graphIndexInput" value="1" min="1">
-      <button id="nextBtn">Next</button>
-      <br>
-      <input type="range" id="graphSlider" min="0" value="0" style="width:80%;">
-      <br>
-      <span>Variation Index: <span id="currentIndex">1</span> / <span id="maxIndex">?</span></span>
-      <br><br>
-      <!-- Train animation controls -->
-      <button id="startTrainBtn">Start Train</button>
-      <button id="pauseTrainBtn">Pause</button>
+        <button id="prevBtn">Previous</button>
+        <input type="number" id="graphIndexInput" value="1" min="1">
+        <button id="nextBtn">Next</button>
+        <br>
+        <input type="range" id="graphSlider" min="0" value="0" style="width:80%;">
+        <br>
+        <span>Variation Index: <span id="currentIndex">1</span> / <span id="maxIndex">?</span></span>
+        <br><br>
+        <!-- Train animation controls -->
+        <button id="startTrainBtn">Start Train</button>
+        <button id="pauseTrainBtn">Pause</button>
     </div>
     <svg id="railSvg" class="rail-svg" width="400" height="400" viewBox="0 0 400 400">
-      <!-- Stations, edges, and train are drawn via JavaScript -->
+        <!-- Stations, edges, and train are drawn via JavaScript -->
     </svg>
-  </div>
+</div>
 
-  <script>
+<script>
     // ----- Copy Python Code with In-page Popup -----
     function copyCode() {
       const codeText = document.getElementById("pythonCode").innerText;
@@ -537,6 +562,6 @@ print(count_connected_excluding_full(6))
     document.getElementById("graphSlider").max = connectedGraphs.length - 1;
     document.getElementById("maxIndex").textContent = connectedGraphs.length;
     displayGraph(0);
-  </script>
+</script>
 </body>
 </html>

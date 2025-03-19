@@ -4,27 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Triangle Puzzle Solution</title>
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f9f9f9;
+            margin: 20px;
+            background-color: #f4f4f9;
             color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
         }
         .container {
-            max-width: 900px;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
             background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin: 20px;
             border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        h1, h2, h3 {
-            color: #444;
+        h1, h2 {
+          text-align: center;
+        }
+        pre {
+          background: #eee;
+          padding: 10px;
+          border-radius: 5px;
+          overflow-x: auto;
+          white-space: pre-wrap;
+        }
+        .formula {
+          text-align: center;
+          font-size: 1.2em;
+          margin: 20px 0;
+        }
+        .formula-explanation {
+          font-size: 1.2em;
+          margin: 20px 0;
         }
         code {
             background-color: #eee;
@@ -81,19 +97,40 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+        p {
+            line-height: 1.6;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-
-<div id="copyPopup">Code copied!</div>
+<header>
+    <div id="nav" style="font-family: sans-serif; padding: 10px; background: #f0f0f0; margin-bottom: 20px;">
+        <a href="index.html" style="margin-right: 10px;">Puzzle index</a>
+        <a href="01_tea.html" style="margin-right: 10px;">1. Tea</a>
+        <a href="02_teacher.html" style="margin-right: 10px;">2. Teacher</a>
+        <a href="03_rails.html" style="margin-right: 10px;">3. Rails</a>
+        <a href="04_triangle.html" style="margin-right: 10px;">4. Triangle</a>
+        <a href="05_game.html">5. Game Puzzle</a>
+    </div>
+</header>
 
 <div class="container">
+    <div id="copyPopup">Code copied!</div>
+
     <h1>Triangle Puzzle Solution</h1>
 
     <div class="section">
-        <h2>Problem Statement</h2>
         <p>
-            We are tasked with calculating the area of the red triangle shown in the image below. The problem contains ambiguous data, including references to "36π" and "5" which do not align with the sizes of the squares in the diagram, and the middle figure being a rectangle rather than a square.
+            We are tasked with calculating the area of the red triangle shown in the image below. The problem contains
+            ambiguous data, including references to "36π" and "5" which do not align with the sizes of the squares in
+            the diagram, and the middle figure being a rectangle rather than a square.
         </p>
         <div style="width: 361px;">
             <img src="lllm_breaker_2.png" alt="Triangle Puzzle Image">
@@ -103,7 +140,8 @@
     <div class="section">
         <h2>Assumption 1: Pixel-Based Calculation</h2>
         <p>
-            If we assume that the image is correctly scaled and that the pixel values represent real-world distances, the calculation proceeds as follows (assuming the side of the bottom square is 1 unit):
+            If we assume that the image is correctly scaled and that the pixel values represent real-world distances,
+            the calculation proceeds as follows (assuming the side of the bottom square is 1 unit):
         </p>
         <pre>
             <button class="copy-btn" onclick="copyCode('code1')">Copy</button>
@@ -141,7 +179,9 @@ print(area_units)</code>
     <div class="section">
         <h2>Assumption 2: Geometric Calculation</h2>
         <p>
-            If the image is not to scale, but the alignment of squares and line crossings is taken as correct, the middle square’s side is determined by the following geometric relationship (assuming the corner of the triangle is the bottom left corner of the middle square rather than top left of the bottom square):
+            If the image is not to scale, but the alignment of squares and line crossings is taken as correct, the
+            middle square’s side is determined by the following geometric relationship (assuming the corner of the
+            triangle is the bottom left corner of the middle square rather than top left of the bottom square):
         </p>
         <pre>
             <button class="copy-btn" onclick="copyCode('code2')">Copy</button>
@@ -169,7 +209,8 @@ area_sol = area_expr.subs(x, x_sol)
 print(area_sol.evalf())</code>
         </pre>
         <p>
-            Result: The side of the middle square is approximately <strong>5.87</strong>, and the triangle’s area is approximately <strong>24.64 units squared</strong>.
+            Result: The side of the middle square is approximately <strong>5.87</strong>, and the triangle’s area is
+            approximately <strong>24.64 units squared</strong>.
         </p>
     </div>
 
@@ -177,7 +218,8 @@ print(area_sol.evalf())</code>
     <div class="section">
         <h2>Conclusion</h2>
         <p>
-            This puzzle presents a challenge due to ambiguous information. However, using reasonable assumptions, we obtained two plausible solutions:
+            This puzzle presents a challenge due to ambiguous information. However, using reasonable assumptions, we
+            obtained two plausible solutions:
         </p>
         <ul>
             <li>Using pixel-based scaling, the triangle’s area is ≈ <strong>1.96 units squared</strong>.</li>
@@ -187,14 +229,14 @@ print(area_sol.evalf())</code>
 </div>
 
 <script>
-function copyCode(id) {
-    const codeBlock = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(codeBlock).then(() => {
-        const popup = document.getElementById('copyPopup');
-        popup.style.display = 'block';
-        setTimeout(() => { popup.style.display = 'none'; }, 2000);
-    });
-}
+    function copyCode(id) {
+        const codeBlock = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(codeBlock).then(() => {
+            const popup = document.getElementById('copyPopup');
+            popup.style.display = 'block';
+            setTimeout(() => { popup.style.display = 'none'; }, 2000);
+        });
+    }
 </script>
 
 </body>
