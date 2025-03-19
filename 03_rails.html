@@ -359,21 +359,25 @@ print(count_connected_excluding_full(6))
     document.getElementById("graphSlider").addEventListener("input", (e) => {
       const idx = parseInt(e.target.value);
       updateGraphIndex(idx);
+      stopTrain();
     });
 
     document.getElementById("prevBtn").addEventListener("click", () => {
       let current = parseInt(document.getElementById("graphSlider").value);
       updateGraphIndex(current - 1);
+      stopTrain();
     });
 
     document.getElementById("nextBtn").addEventListener("click", () => {
       let current = parseInt(document.getElementById("graphSlider").value);
       updateGraphIndex(current + 1);
+      stopTrain();
     });
 
     document.getElementById("graphIndexInput").addEventListener("change", (e) => {
       let idx = parseInt(e.target.value) - 1;
       updateGraphIndex(idx);
+      stopTrain();
     });
 
     // ----- Train Animation -----
